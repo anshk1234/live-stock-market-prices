@@ -136,13 +136,6 @@ st.sidebar.markdown(f"**Sector**: {info.get('sector', 'N/A')}")
 st.sidebar.markdown(f"**Market Cap**: ${info.get('marketCap', 'N/A'):,}")
 st.sidebar.markdown(f"**PE Ratio**: {info.get('trailingPE', 'N/A')}")
 st.sidebar.markdown(f"**52-Week High**: ${info.get('fiftyTwoWeekHigh', 'N/A')}")
-
-# Refresh options
-st.sidebar.markdown("---")
-if st.sidebar.button("🔄 Manual Refresh"):
-    st.experimental_rerun()
-
-
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 🙌 Credits")
 st.sidebar.markdown("""
@@ -154,4 +147,5 @@ st.sidebar.markdown("""
 - 🌐 **see other projects**: [streamlit.io/ansh kunwar](https://share.streamlit.io/user/anshk1234)  
 - 📧 **Contact**: anshkunwar3009@gmail.com                    
 """) 
+
 
