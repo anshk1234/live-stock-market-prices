@@ -148,4 +148,7 @@ st.sidebar.markdown("""
 - 📧 **Contact**: anshkunwar3009@gmail.com                    
 """) 
 
+# ---- Footer ----
+st.markdown("<p style='text-align:center; color:white;'>© 2025 Live Stock Dashboard | Powered by Yahoo Finance</p>", unsafe_allow_html=True)
+
 
