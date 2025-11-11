@@ -45,8 +45,8 @@ logos = {
     "Amazon": "https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg",
     "Tesla": "https://upload.wikimedia.org/wikipedia/commons/b/bd/Tesla_Motors.svg",
     "Google": "https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg",
-    "NVIDIA": "https://upload.wikimedia.org/wikipedia/en/2/21/Nvidia_logo.svg",
-    "Meta": "https://upload.wikimedia.org/wikipedia/commons/8/8d/Meta_Platforms_Inc._logo.svg"
+    "NVIDIA": "https://www.logo.wine/a/logo/Nvidia/Nvidia-Light-Vertical-Dark-Background-Logo.wine.svg",
+    "Meta": "https://tse2.mm.bing.net/th/id/OIP.UuE5-qQHGzojP7JoW2jRzwHaGB?cb=ucfimg2ucfimg=1&rs=1&pid=ImgDetMain&o=7&rm=3"
 }
 
 # Sidebar: Select company
@@ -150,5 +150,6 @@ st.sidebar.markdown("""
 
 # ---- Footer ----
 st.markdown("<p style='text-align:center; color:white;'>© 2025 Live Stock Dashboard | Powered by Yahoo Finance</p>", unsafe_allow_html=True)
+
 
 
