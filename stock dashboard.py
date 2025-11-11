@@ -40,11 +40,11 @@ symbols = {
 
 # Logo URLs (PNG-based for reliability)
 logos = {
-    "Apple": "https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg",
-    "Microsoft": "https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg",
-    "Amazon": "https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg",
-    "Tesla": "https://upload.wikimedia.org/wikipedia/commons/b/bd/Tesla_Motors.svg",
-    "Google": "https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg",
+    "Apple": "https://www.svgrepo.com/show/511330/apple-173.svg",
+    "Microsoft": "https://www.svgrepo.com/show/303143/microsoft-logo.svg",
+    "Amazon": "https://th.bing.com/th/id/OIP.fQkwX1ZDIGJdxn8gBQ43GwHaE8?o=7&cb=ucfimg2rm=3&ucfimg=1&rs=1&pid=ImgDetMain&o=7&rm=3",
+    "Tesla": "https://tse3.mm.bing.net/th/id/OIP.4lTkYbgpTxuwUGtVvR-ywQHaEK?cb=ucfimg2ucfimg=1&rs=1&pid=ImgDetMain&o=7&rm=3",
+    "Google": "https://www.svgrepo.com/show/475656/google-color.svg",
     "NVIDIA": "https://www.logo.wine/a/logo/Nvidia/Nvidia-Light-Vertical-Dark-Background-Logo.wine.svg",
     "Meta": "https://tse2.mm.bing.net/th/id/OIP.UuE5-qQHGzojP7JoW2jRzwHaGB?cb=ucfimg2ucfimg=1&rs=1&pid=ImgDetMain&o=7&rm=3"
 }
@@ -150,6 +150,7 @@ st.sidebar.markdown("""
 
 # ---- Footer ----
 st.markdown("<p style='text-align:center; color:white;'>© 2025 Live Stock Dashboard | Powered by Yahoo Finance</p>", unsafe_allow_html=True)
+
 
 
 
