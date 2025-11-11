@@ -41,7 +41,7 @@ symbols = {
 # Logo URLs (PNG-based for reliability)
 logos = {
     "Apple": "https://www.svgrepo.com/show/511330/apple-173.svg",
-    "Microsoft": "https://www.svgrepo.com/show/303143/microsoft-logo.svg",
+    "Microsoft": "https://www.svgrepo.com/show/448239/microsoft.svg",
     "Amazon": "https://th.bing.com/th/id/OIP.fQkwX1ZDIGJdxn8gBQ43GwHaE8?o=7&cb=ucfimg2rm=3&ucfimg=1&rs=1&pid=ImgDetMain&o=7&rm=3",
     "Tesla": "https://tse3.mm.bing.net/th/id/OIP.4lTkYbgpTxuwUGtVvR-ywQHaEK?cb=ucfimg2ucfimg=1&rs=1&pid=ImgDetMain&o=7&rm=3",
     "Google": "https://www.svgrepo.com/show/475656/google-color.svg",
@@ -150,6 +150,7 @@ st.sidebar.markdown("""
 
 # ---- Footer ----
 st.markdown("<p style='text-align:center; color:white;'>© 2025 Live Stock Dashboard | Powered by Yahoo Finance</p>", unsafe_allow_html=True)
+
 
 
 
