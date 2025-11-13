@@ -28,6 +28,7 @@ if st.session_state.show_intro:
     splash.empty()
     st.session_state.show_intro = False
 
+st.header('''📈 Live Stock Dashboard''')
 # Define companies and symbols
 symbols = {
     "Apple": "AAPL",
@@ -252,6 +253,7 @@ st.sidebar.markdown("""
     
 # ---- Footer ----
 st.markdown("<p style='text-align:center; color:white;'>© 2025 Live Stock Dashboard | Powered by Yahoo Finance</p>", unsafe_allow_html=True)
+
 
 
 
