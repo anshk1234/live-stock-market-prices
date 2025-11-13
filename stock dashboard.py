@@ -238,18 +238,19 @@ st.sidebar.markdown(f"**52-Week High**: ${info.get('fiftyTwoWeekHigh', 'N/A')}")
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 🙌 Credits")
 st.sidebar.markdown("""
-- 👨‍💻 **Developer**: Ansh Kunwar
+- 👨‍💻 **Developed by**: Ansh Kunwar
 - 📊 **Data Source**: [Yahoo Finance](https://finance.yahoo.com)  
 - 🖼️ **Logos**: Wikimedia Commons  
 - ⚙️ **Tech Stack**: Streamlit + Plotly  
 - 🧠 **Source Code**: [GitHub Repository](https://github.com/anshk1234/live-stock-market-prices)  
 - 🌐 **see other projects**: [streamlit.io/ansh kunwar](https://share.streamlit.io/user/anshk1234)  
 - 📧 **Contact**: anshkunwar3009@gmail.com     
-
-**This App is Licensed Under Apache License 2.0**
+-  This App is Licensed Under **Apache License 2.0**
+     **© 2025 LIVE STOCK DASHBOARD**
 """) 
     
 # ---- Footer ----
 st.markdown("<p style='text-align:center; color:white;'>© 2025 Live Stock Dashboard | Powered by Yahoo Finance</p>", unsafe_allow_html=True)
+
 
 
