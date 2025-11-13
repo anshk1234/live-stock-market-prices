@@ -238,7 +238,7 @@ st.sidebar.markdown(f"**52-Week High**: ${info.get('fiftyTwoWeekHigh', 'N/A')}")
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 🙌 Credits")
 st.sidebar.markdown("""
-- 👨‍💻 **Built by**: Ansh Kunwar
+- 👨‍💻 **Developer**: Ansh Kunwar
 - 📊 **Data Source**: [Yahoo Finance](https://finance.yahoo.com)  
 - 🖼️ **Logos**: Wikimedia Commons  
 - ⚙️ **Tech Stack**: Streamlit + Plotly  
@@ -249,3 +249,4 @@ st.sidebar.markdown("""
     
 # ---- Footer ----
 st.markdown("<p style='text-align:center; color:white;'>© 2025 Live Stock Dashboard | Powered by Yahoo Finance</p>", unsafe_allow_html=True)
+
