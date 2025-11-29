@@ -6,6 +6,7 @@ import altair as alt
 import time
 import json
 from streamlit_lottie import st_lottie
+from datetime import datetime
 
 # Page config
 st.set_page_config(page_title="📈 Live Stock Dashboard", layout="wide")
@@ -89,6 +90,16 @@ def fetch_metrics():
             "Market Cap": info.get("marketCap", "N/A")
         })
     return pd.DataFrame(metrics)
+
+# Fetch news
+def fetch_news(ticker):
+    try:
+        stock = yf.Ticker(ticker)
+        return stock.news
+    except Exception as e:
+        st.error(f"Error fetching news: {e}")
+        return []
+
 
 # Peer comparison dashboard
 def show_peer_analysis():
@@ -209,7 +220,7 @@ def show_peer_analysis():
             
 
 # Tabs layout
-tab1, tab2, tab3 = st.tabs(["📈 Live Prices", "📉 Peer Trends", "📊 Metrics"])
+tab1, tab2, tab3, tab4 = st.tabs(["📈 Live Prices", "📉 Peer Trends", "📊 Metrics",  "📰 News"])
 
 with tab1:
     st.subheader("📈 Live Stock Prices")
@@ -229,7 +240,46 @@ with tab3:
                    title="PE Ratio and EPS by Company", markers=True)
     st.plotly_chart(fig3, use_container_width=True)
     st.dataframe(metrics_df.set_index("Company"))
-    
+
+with tab4:
+    st.subheader(f"📰 Latest News for {selected}")
+    news_items = fetch_news(selected_symbol)
+
+    if news_items:
+        for item in news_items[:8]:
+            content = item.get("content", {})
+            title = content.get("title", "No title available")
+            summary = content.get("summary", "")
+            pubDate = content.get("pubDate", None)
+            link = content.get("canonicalUrl", {}).get("url", None)
+            thumbnail = content.get("thumbnail", {}).get("originalUrl", None)
+            provider = content.get("provider", {}).get("displayName", "Unknown")
+
+            # Show headline
+            st.markdown(f"### {title}")
+
+            # Show thumbnail if available
+            if thumbnail:
+                st.image(thumbnail, width=400)
+
+            # Show summary
+            if summary:
+                st.write(summary)
+
+            # Show source + publish time
+            if pubDate:
+                st.caption(f"Source: {provider} | Published: {pubDate}")
+            else:
+                st.caption(f"Source: {provider}")
+
+            # Show link
+            if link:
+                st.markdown(f"[Read more]({link})")
+
+            st.markdown("---")
+    else:
+        st.info("No news available at the moment.")
+
 # Sidebar insights
 info = yf.Ticker(selected_symbol).info
 st.sidebar.markdown(f"**Sector**: {info.get('sector', 'N/A')}")
@@ -248,13 +298,10 @@ st.sidebar.markdown("""
 - 📧 **Contact**: anshkunwar3009@gmail.com     
 -  This App is Licensed Under **Apache License 2.0**
     
-     **© 2025 LIVE STOCK DASHBOARD**
+     
 """) 
+
+st.sidebar.markdown("<br><center>© 2025 Live Stock Dashboard</center>", unsafe_allow_html=True)
     
 # ---- Footer ----
 st.markdown("<p style='text-align:center; color:white;'>© 2025 Live Stock Dashboard | Powered by Yahoo Finance</p>", unsafe_allow_html=True)
-
-
-
-
-
