@@ -7,6 +7,8 @@ import time
 import json
 from streamlit_lottie import st_lottie
 from datetime import datetime
+import io
+from streamlit_echarts import st_echarts
 
 # Page config
 st.set_page_config(page_title="📈 Live Stock Dashboard", layout="wide")
@@ -217,10 +219,9 @@ def show_peer_analysis():
 # raw data display
     st.markdown("## Raw data")
     st.dataframe(data)
-            
 
 # Tabs layout
-tab1, tab2, tab3, tab4 = st.tabs(["📈 Live Prices", "📉 Peer Trends", "📊 Metrics",  "📰 News"])
+tab1, tab2, tab3, tab4, tab5= st.tabs(["📈 Live Prices", "📉 Peer Trends", "📊 Metrics",  "📰 News", "⚡ portfolio"])
 
 with tab1:
     st.subheader("📈 Live Stock Prices")
@@ -280,6 +281,189 @@ with tab4:
     else:
         st.info("No news available at the moment.")
 
+with tab5:
+    # Session state to store portfolio
+    if "portfolio" not in st.session_state:
+        st.session_state.portfolio = []
+
+    st.subheader("📁 Portfolio Tracker")
+    st.caption("Track your investments and performance in real-time")
+
+    # upload portfolio from CSV
+    uploaded_file = st.file_uploader("📥 Import Portfolio CSV", type=["csv"])
+    if uploaded_file:
+        imported_df = pd.read_csv(uploaded_file)
+        # Convert imported rows into session_state format
+        st.session_state.portfolio = [
+            {
+                "ticker": row["ASSET"],
+                "quantity": int(row["DETAIL"].split()[0]),  # e.g., "15 shares @ $120.00"
+                "buy_price": float(row["DETAIL"].split("@ $")[1])
+            }
+            for _, row in imported_df.iterrows()
+        ]
+        st.success("Portfolio imported successfully!")
+        
+    #input form to add new asset
+    # --- Input Section ---
+    st.write("➕ Add New Asset to Portfolio")
+
+    tickers = [
+        "AAPL", "ABBV", "ACN", "ADBE", "ADP", "AMD", "AMGN", "AMT", "AMZN", "APD",
+        "AVGO", "AXP", "BA", "BK", "BKNG", "BMY", "BRK.B", "BSX", "C", "CAT", "CI",
+        "CL", "CMCSA", "COST", "CRM", "CSCO", "CVX", "DE", "DHR", "DIS", "DUK",
+        "ELV", "EOG", "EQR", "FDX", "GD", "GE", "GILD", "GOOG", "GOOGL", "HD",
+        "HON", "HUM", "IBM", "ICE", "INTC", "ISRG", "JNJ", "JPM", "KO", "LIN",
+        "LLY", "LMT", "LOW", "MA", "MCD", "MDLZ", "META", "MMC", "MO", "MRK",
+        "MSFT", "NEE", "NFLX", "NKE", "NOW", "NVDA", "ORCL", "PEP", "PFE", "PG",
+        "PLD", "PM", "PSA", "REGN", "RTX", "SBUX", "SCHW", "SLB", "SO", "SPGI",
+        "T", "TJX", "TMO", "TSLA", "TXN", "UNH", "UNP", "UPS", "V", "VZ", "WFC",
+        "WM", "WMT", "XOM"
+    ]
+
+    with st.form("add_asset_form"):
+        col1, col2, col3 = st.columns([2, 1, 1])
+
+    # 🔽 Replace text_input with selectbox (searchable dropdown)
+        ticker_input = col1.selectbox("Search Stock", tickers)
+
+        quantity_input = col2.number_input("Quantity", min_value=1, step=1)
+        buy_price_input = col3.number_input("Buy Price", min_value=0.0, format="%.2f")
+
+        submitted = st.form_submit_button("➕ Add Asset")
+
+        if submitted and ticker_input:
+            st.session_state.portfolio.append({
+                "ticker": ticker_input,   # already uppercase from list
+                "quantity": quantity_input,
+                "buy_price": buy_price_input
+            })
+
+    #  --- Portfolio Table ---
+        def get_portfolio_df(portfolio):
+            rows = []
+            for asset in portfolio:
+                ticker = yf.Ticker(asset["ticker"])
+                try:
+                    current_price = ticker.history(period="1d")["Close"].iloc[-1]
+                except:
+                    current_price = 0.0
+                quantity = asset["quantity"]
+                buy_price = asset["buy_price"]
+                invested = quantity * buy_price
+                value = quantity * current_price
+                gain = value - invested
+                gain_pct = (gain / invested) * 100 if invested else 0
+                rows.append({
+                    "ASSET": asset["ticker"],
+                    "PRICE": current_price,   # numeric
+                    "BALANCE": value,         # numeric
+                    "GAIN": gain,             # numeric
+                    "GAIN_PCT": gain_pct,     # numeric
+                    "DETAIL": f"{quantity} shares @ ${buy_price:.2f}"
+                })
+            return pd.DataFrame(rows)
+
+        df = get_portfolio_df(st.session_state.portfolio)
+
+    # --- Summary Cards ---
+    total_invested = sum(asset["quantity"] * asset["buy_price"] for asset in st.session_state.portfolio)
+    total_value = df["BALANCE"].sum() if not df.empty else 0
+    total_gain = total_value - total_invested
+    gain_pct = (total_gain / total_invested) * 100 if total_invested else 0
+
+    colA, colB, colC = st.columns(3)
+    colA.metric("💰 Total Balance", f"${total_value:.2f}")
+    colB.metric("📈 Total Profit/Loss", f"${total_gain:.2f}", f"{gain_pct:.2f}% All Time")
+    colC.metric("🏦 Invested Capital", f"${total_invested:.2f}")
+
+    # --- Charts Section ---
+    if not df.empty:
+        st.markdown("### 📊 Portfolio Charts")
+
+    # Build data for echarts pie chart
+    pie_data = [
+        {"value": row["BALANCE"], "name": row["ASSET"]}
+        for _, row in df.iterrows()
+    ]
+
+    options = {
+        "title": {
+            "text": "Portfolio Allocation",
+            "left": "center",
+            "textStyle": {"color": "#fff"},
+        },
+        "tooltip": {"trigger": "item"},
+        "legend": {
+            "orient": "vertical",
+            "left": "left",
+            "textStyle": {"color": "#fff"}  # legend text white
+        },
+        "series": [
+            {
+                "name": "Allocation",
+                "type": "pie",
+                "radius": "90%",
+                "data": pie_data,
+                "label": {
+                    "show": True,
+                    "position": "inside",
+                    "formatter": "{b}: {d}%",
+                    "color": "#fff",           # label text white
+                    "fontWeight": "bold",
+                    "fontSize": 12
+                },
+                "emphasis": {
+                    "itemStyle": {
+                        "shadowBlur": 10,
+                        "shadowOffsetX": 0,
+                        "shadowColor": "rgba(0, 0, 0, 0.5)"
+                    }
+                }
+            }
+        ]
+    }
+
+    st_echarts(options=options, height="300px")
+
+
+
+    # --- Bar chart for returns ---
+    if not df.empty and "GAIN_PCT" in df.columns:
+        fig2 = px.bar(
+            df,
+            x="ASSET",
+            y="GAIN",
+            color="GAIN",
+            text=df["GAIN_PCT"].apply(lambda x: f"{x:.2f}%"),
+            title="Gain/Loss by Asset"
+        )
+        st.plotly_chart(fig2, use_container_width=True)
+    else:
+        st.info("No portfolio data available to display returns chart.")
+
+
+    # --- Holdings Table ---
+    st.markdown("### Your Holdings")
+    st.dataframe(df.style.format({
+        "PRICE": "${:.2f}",
+        "BALANCE": "${:.2f}",
+        "GAIN": "${:.2f}",
+        "GAIN_PCT": "{:.2f}%"
+    }), use_container_width=True)
+    
+    # Download portfolio as CSV
+    csv = df.to_csv(index=False).encode("utf-8")
+    st.download_button(
+        label="📤 Export Portfolio as CSV",
+        data=csv,
+        file_name="portfolio.csv",
+        mime="text/csv"
+    )
+
+    
+    
+
 # Sidebar insights
 info = yf.Ticker(selected_symbol).info
 st.sidebar.markdown(f"**Sector**: {info.get('sector', 'N/A')}")
@@ -305,4 +489,3 @@ st.sidebar.markdown("<br><center>© 2025 Live Stock Dashboard</center>", unsafe_
     
 # ---- Footer ----
 st.markdown("<p style='text-align:center; color:white;'>© 2025 Live Stock Dashboard | Powered by Yahoo Finance</p>", unsafe_allow_html=True)
-
