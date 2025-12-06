@@ -246,7 +246,7 @@ with tab4:
     news_items = fetch_news(selected_symbol)
 
     if news_items:
-        for item in news_items[:8]:
+        for item in news_items[:4]:
             content = item.get("content", {})
             title = content.get("title", "No title available")
             summary = content.get("summary", "")
@@ -305,3 +305,4 @@ st.sidebar.markdown("<br><center>© 2025 Live Stock Dashboard</center>", unsafe_
     
 # ---- Footer ----
 st.markdown("<p style='text-align:center; color:white;'>© 2025 Live Stock Dashboard | Powered by Yahoo Finance</p>", unsafe_allow_html=True)
+
