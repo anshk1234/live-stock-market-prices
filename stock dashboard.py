@@ -9,6 +9,8 @@ from streamlit_lottie import st_lottie
 from datetime import datetime
 import io
 from streamlit_echarts import st_echarts
+import plotly.graph_objects as go
+
 
 # Page config
 st.set_page_config(page_title="📈 Live Stock Dashboard", layout="wide")
@@ -66,21 +68,26 @@ except:
     st.sidebar.image("https://upload.wikimedia.org/wikipedia/commons/6/65/No-Image-Placeholder.svg", width=120)
 
 # Fetch live data
-def fetch_live_data():
-    data = {}
-    for name, symbol in symbols.items():
-        stock = yf.Ticker(symbol)
-        info = stock.info
-        data[name] = {
-            "Price": info["regularMarketPrice"],
-            "Change": info["regularMarketChangePercent"]
-        }
-    return pd.DataFrame([
-        {"Company": name, "Price (USD)": d["Price"], "Change (%)": d["Change"]}
-        for name, d in data.items()
-    ])
+def fetch_stock_details(ticker, period="1mo"):
+    stock = yf.Ticker(ticker)
+    info = stock.info
 
-# Fetch financial metrics
+    details = {
+        "price": info.get("regularMarketPrice", "N/A"),
+        "change_pct": info.get("regularMarketChangePercent", 0),
+        "market_cap": info.get("marketCap", "N/A"),
+        "pe_ratio": info.get("trailingPE", "N/A"),
+        "eps": info.get("trailingEps", "N/A"),
+        "high_52w": info.get("fiftyTwoWeekHigh", "N/A"),
+        "low_52w": info.get("fiftyTwoWeekLow", "N/A"),
+        "volume": info.get("volume", "N/A"),
+        "dividend_yield": info.get("dividendYield", "N/A"),
+    }
+
+    # Request full OHLC data
+    history = stock.history(period=period, interval="1d")[["Open", "High", "Low", "Close"]]
+    return details, history
+
 def fetch_metrics():
     metrics = []
     for name, symbol in symbols.items():
@@ -89,7 +96,13 @@ def fetch_metrics():
             "Company": name,
             "PE Ratio": info.get("trailingPE", "N/A"),
             "EPS": info.get("trailingEps", "N/A"),
-            "Market Cap": info.get("marketCap", "N/A")
+            "Market Cap": info.get("marketCap", "N/A"),
+            "52W High": info.get("fiftyTwoWeekHigh", "N/A"),
+            "52W Low": info.get("fiftyTwoWeekLow", "N/A"),
+            "Dividend Yield": info.get("dividendYield", "N/A"),
+            "Volume": info.get("volume", "N/A"),
+            "Sector": info.get("sector", "N/A"),
+            "Analyst Rating": info.get("recommendationMean", "N/A")  # 1=Strong Buy, 5=Sell
         })
     return pd.DataFrame(metrics)
 
@@ -106,17 +119,17 @@ def fetch_news(ticker):
 # Peer comparison dashboard
 def show_peer_analysis():
     STOCKS = [
-    "AAPL", "ABBV", "ACN", "ADBE", "ADP", "AMD", "AMGN", "AMT", "AMZN", "APD",
-    "AVGO", "AXP", "BA", "BK", "BKNG", "BMY", "BRK.B", "BSX", "C", "CAT", "CI",
-    "CL", "CMCSA", "COST", "CRM", "CSCO", "CVX", "DE", "DHR", "DIS", "DUK",
-    "ELV", "EOG", "EQR", "FDX", "GD", "GE", "GILD", "GOOG", "GOOGL", "HD",
-    "HON", "HUM", "IBM", "ICE", "INTC", "ISRG", "JNJ", "JPM", "KO", "LIN",
-    "LLY", "LMT", "LOW", "MA", "MCD", "MDLZ", "META", "MMC", "MO", "MRK",
-    "MSFT", "NEE", "NFLX", "NKE", "NOW", "NVDA", "ORCL", "PEP", "PFE", "PG",
-    "PLD", "PM", "PSA", "REGN", "RTX", "SBUX", "SCHW", "SLB", "SO", "SPGI",
-    "T", "TJX", "TMO", "TSLA", "TXN", "UNH", "UNP", "UPS", "V", "VZ", "WFC",
-    "WM", "WMT", "XOM"
-]
+        "AAPL","ABBV","ACN","ADBE","ADP","AMD","AMGN","AMT","AMZN","APD",
+        "AVGO","AXP","BA","BK","BKNG","BMY","BRK.B","BSX","C","CAT","CI",
+        "CL","CMCSA","COST","CRM","CSCO","CVX","DE","DHR","DIS","DUK",
+        "ELV","EOG","EQR","FDX","GD","GE","GILD","GOOG","GOOGL","HD",
+        "HON","HUM","IBM","ICE","INTC","ISRG","JNJ","JPM","KO","LIN",
+        "LLY","LMT","LOW","MA","MCD","MDLZ","META","MMC","MO","MRK",
+        "MSFT","NEE","NFLX","NKE","NOW","NVDA","ORCL","PEP","PFE","PG",
+        "PLD","PM","PSA","REGN","RTX","SBUX","SCHW","SLB","SO","SPGI",
+        "T","TJX","TMO","TSLA","TXN","UNH","UNP","UPS","V","VZ","WFC",
+        "WM","WMT","XOM"
+    ]
     horizon_map = {
         "1 Month": "1mo",
         "3 Months": "3mo",
@@ -164,6 +177,7 @@ def show_peer_analysis():
     normalized = clean_data.div(clean_data.iloc[0])
     normalized.index.name = "Date"
 
+    # --- Peer comparison chart ---
     st.altair_chart(
         alt.Chart(
             normalized.reset_index().melt(
@@ -180,6 +194,45 @@ def show_peer_analysis():
         use_container_width=True
     )
 
+    
+    # --- Price cards inside expander only ---
+    with st.expander("💵 Current Prices of Selected Companies", expanded=False):
+        for i in range(0, len(tickers), 4):  # 4 cards per row
+            row = st.columns(min(4, len(tickers) - i))
+            for j, ticker in enumerate(tickers[i:i+4]):
+                try:
+                    stock = yf.Ticker(ticker)
+                    info = stock.info
+                    price = info.get("currentPrice", "N/A")
+                    change_pct = info.get("regularMarketChangePercent", 0.0)
+
+                # Sparkline data
+                    hist = stock.history(period="1mo")["Close"]
+                    sparkline_data = pd.DataFrame({"Date": hist.index, "Price": hist.values})
+
+                # Color based on trend
+                    color = "green" if hist.iloc[-1] > hist.iloc[0] else "red"
+
+                    with row[j].container(border=True):
+                        st.metric(label=ticker, value=f"${price}", delta=f"{change_pct:.2f}%")
+
+                        # Sparkline with dynamic y-scale and better height
+                        sparkline = (
+                            alt.Chart(sparkline_data)
+                            .mark_line(color=color)
+                            .encode(
+                                x=alt.X("Date:T", axis=None),
+                                y=alt.Y("Price:Q", scale=alt.Scale(domain=[hist.min(), hist.max()]), axis=None)
+                            )
+                            .properties(height=100)
+                        )
+                        st.altair_chart(sparkline, use_container_width=True)
+
+                except:
+                    with row[j].container(border=True):
+                        st.metric(label=ticker, value="N/A", delta="N/A")
+
+    # --- Peer average comparison charts ---
     if len(tickers) > 1:
         st.markdown("### Individual vs Peer Average")
         cols = st.columns(4)
@@ -216,7 +269,7 @@ def show_peer_analysis():
             cell = cols[(i * 2 + 1) % 4].container(border=True)
             cell.altair_chart(chart, use_container_width=True)
 
-# raw data display
+    # raw data display
     st.markdown("## Raw data")
     st.dataframe(data)
 
@@ -224,22 +277,176 @@ def show_peer_analysis():
 tab1, tab2, tab3, tab4, tab5= st.tabs(["📈 Live Prices", "📉 Peer Trends", "📊 Metrics",  "📰 News", "⚡ portfolio"])
 
 with tab1:
-    st.subheader("📈 Live Stock Prices")
-    live_df = fetch_live_data()
-    fig = px.bar(live_df, x="Company", y="Price (USD)", color="Change (%)",
-                 color_continuous_scale="RdYlGn", title="Live Prices")
-    st.plotly_chart(fig, use_container_width=True)
-    st.dataframe(live_df.set_index("Company"))
+    st.subheader("🔍 Stock Explorer")
+
+    # --- Stock selector ---
+    STOCKS = [
+        "AAPL","ABBV","ACN","ADBE","ADP","AMD","AMGN","AMT","AMZN","APD",
+        "AVGO","AXP","BA","BK","BKNG","BMY","BRK.B","BSX","C","CAT","CI",
+        "CL","CMCSA","COST","CRM","CSCO","CVX","DE","DHR","DIS","DUK",
+        "ELV","EOG","EQR","FDX","GD","GE","GILD","GOOG","GOOGL","HD",
+        "HON","HUM","IBM","ICE","INTC","ISRG","JNJ","JPM","KO","LIN",
+        "LLY","LMT","LOW","MA","MCD","MDLZ","META","MMC","MO","MRK",
+        "MSFT","NEE","NFLX","NKE","NOW","NVDA","ORCL","PEP","PFE","PG",
+        "PLD","PM","PSA","REGN","RTX","SBUX","SCHW","SLB","SO","SPGI",
+        "T","TJX","TMO","TSLA","TXN","UNH","UNP","UPS","V","VZ","WFC",
+        "WM","WMT","XOM"
+    ]
+    selected_ticker = st.selectbox("Choose a company", STOCKS)
+
+    # --- Company name display ---
+    stock = yf.Ticker(selected_ticker)
+    company_name = stock.info.get("longName", selected_ticker)
+    st.markdown(f"## {company_name} ({selected_ticker})")
+
+    # --- Time horizon selector ABOVE chart ---
+    horizon_map = {
+        "1 Month": "1mo",
+        "3 Months": "3mo",
+        "6 Months": "6mo",
+        "1 Year": "1y",
+        "5 Years": "5y",
+        "10 Years": "10y",
+        "20 Years": "20y",
+    }
+    
+    time_range = st.selectbox(
+        "Select time horizon",
+        list(horizon_map.keys()),
+        index=1  # default to "3 Months"
+    )
+    # --- Trend chart ---
+    details, history = fetch_stock_details(selected_ticker, horizon_map[time_range])
+    if not history.empty and {"Open", "High", "Low", "Close"}.issubset(history.columns):
+    # Split layout: chart on left, key metrics (Price, PE, EPS) on right
+        col_chart, col_metrics = st.columns([4, 1])
+
+        with col_chart:
+            fig = go.Figure()
+
+        # Candlestick
+            fig.add_trace(go.Candlestick(
+                x=history.index,
+                open=history["Open"],
+                high=history["High"],
+                low=history["Low"],
+                close=history["Close"],
+                name="Candlestick",
+                increasing_line_color='green',
+                decreasing_line_color='red'
+            ))
+
+        # Line chart overlay
+            fig.add_trace(go.Scatter(
+                x=history.index,
+                y=history["Close"],
+                mode="lines",
+                name="Close Price",
+                line=dict(color="cyan", width=2)
+            ))
+
+            fig.update_layout(
+                xaxis_title="Date",
+                yaxis_title="Price",
+                xaxis_rangeslider_visible=False,
+                template="plotly_dark",
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+            )
+
+            st.plotly_chart(fig, use_container_width=True)
+
+    # Right-side metrics (card style)
+        with col_metrics.container(border=True):
+            st.metric("💵 Price", f"${details['price']}", f"{details['change_pct']:.2f}%")
+        with col_metrics.container(border=True):
+            st.metric("📊 PE Ratio", details['pe_ratio'])
+        with col_metrics.container(border=True):
+            st.metric("📈 EPS", details['eps'])
+    else:
+        st.info("Candlestick data not available for this range.")
+
+    # --- Other snapshot cards BELOW chart ---
+    st.markdown("### 📊 Company Snapshot")
+
+    row1 = st.columns(3)
+    with row1[0].container(border=True):
+        st.metric("📦 Volume", f"{details['volume']:,}")
+    with row1[1].container(border=True):
+        st.metric("🏦 Market Cap", f"${details['market_cap']:,}" if details['market_cap'] != "N/A" else "N/A")
+    with row1[2].container(border=True):
+        st.metric("🏷️ Sector", stock.info.get("sector", "N/A"))
+
+    row2 = st.columns(3)
+    with row2[0].container(border=True):
+        st.metric("📉 52W High", f"${details['high_52w']}")
+    with row2[1].container(border=True):
+        st.metric("📉 52W Low", f"${details['low_52w']}")
+    with row2[2].container(border=True):
+        st.metric("💸 Dividend Yield", f"{details['dividend_yield']:.2%}" if details['dividend_yield'] != "N/A" else "N/A")
+    
+    
 
 with tab2:
     show_peer_analysis()
 
+
 with tab3:
-    st.subheader("📊 Financial Metrics")
+    st.subheader("📊 Financial Metrics & Analyst Insights")
     metrics_df = fetch_metrics()
-    fig3 = px.line(metrics_df.sort_values("EPS"), x="Company", y=["PE Ratio", "EPS"],
-                   title="PE Ratio and EPS by Company", markers=True)
-    st.plotly_chart(fig3, use_container_width=True)
+
+    # Line chart: PE Ratio and EPS
+    fig_pe_eps = px.line(
+        metrics_df.sort_values("EPS"),
+        x="Company", y=["PE Ratio", "EPS"],
+        title="PE Ratio and EPS by Company", markers=True
+    )
+    st.plotly_chart(fig_pe_eps, use_container_width=True)
+
+    # Bar chart: Market Cap
+    fig_marketcap = px.bar(
+        metrics_df.sort_values("Market Cap", ascending=False),
+        x="Company", y="Market Cap",
+        title="Market Cap by Company", text_auto=True
+    )
+    st.plotly_chart(fig_marketcap, use_container_width=True)
+
+    # Analyst Rating Chart (bar)
+    fig_rating = px.bar(
+        metrics_df.sort_values("Analyst Rating"),
+        x="Analyst Rating", y="Company",
+        orientation="h",
+        color="Analyst Rating",
+        color_continuous_scale="RdYlGn_r",
+        title="Analyst Recommendation Score (1=Strong Buy, 5=Sell)"
+    )
+    st.plotly_chart(fig_rating, use_container_width=True)
+
+    # Analyst Rating Gauges in card UI (max 4 per row)
+    st.subheader("🔮 Analyst Rating Gauges")
+    for i in range(0, len(metrics_df), 4):
+        cols = st.columns(4)  # up to 4 cards per row
+        for j, (_, row) in enumerate(metrics_df.iloc[i:i+4].iterrows()):
+            with cols[j]:
+                with st.container(border=True):  # card-style border
+                    st.markdown(f"### {row['Company']}")
+                    fig = go.Figure(go.Indicator(
+                        mode="gauge+number",
+                        value=row["Analyst Rating"],
+                        title={"text": "Analyst Rating"},
+                        gauge={
+                            "axis": {"range": [1, 5]},
+                            "steps": [
+                                {"range": [1, 2], "color": "green"},
+                                {"range": [2, 3], "color": "lightgreen"},
+                                {"range": [3, 4], "color": "orange"},
+                                {"range": [4, 5], "color": "red"}
+                            ]
+                        }
+                    ))
+                    fig.update_layout(height=200, margin=dict(t=20, b=20, l=10, r=10))
+                    st.plotly_chart(fig, use_container_width=True)
+
+    # Full Data Table
     st.dataframe(metrics_df.set_index("Company"))
 
 with tab4:
