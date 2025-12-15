@@ -94,7 +94,7 @@ def fetch_stock_details(ticker, period="1mo"):
 
 
 # Fetch news
-@st.cache_data(ttl=21600) 
+@st.cache_data(ttl=36000) 
 def fetch_news(ticker):
     try:
         stock = yf.Ticker(ticker)
@@ -741,6 +741,7 @@ st.sidebar.markdown("<br><center>© 2025 Live Stock Dashboard</center>", unsafe_
     
 # ---- Footer ----
 st.markdown("<p style='text-align:center; color:white;'>© 2025 Live Stock Dashboard | Powered by Yahoo Finance</p>", unsafe_allow_html=True)
+
 
 
 
