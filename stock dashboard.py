@@ -6,10 +6,12 @@ import altair as alt
 import time
 import json
 from streamlit_lottie import st_lottie
-from datetime import datetime
+from datetime import datetime, timedelta
 import io
 from streamlit_echarts import st_echarts
 import plotly.graph_objects as go
+import streamlit.components.v1 as components
+
 
 
 # Page config
@@ -273,8 +275,17 @@ def show_peer_analysis():
     st.markdown("## Raw data")
     st.dataframe(data)
 
+def next_saturday(start_date=None):
+    if start_date is None:
+        start_date = datetime.today()
+    days_ahead = 5 - start_date.weekday()  # Saturday = 5
+    if days_ahead <= 0:
+        days_ahead += 7
+    return start_date + timedelta(days=days_ahead)
+
+
 # Tabs layout
-tab1, tab2, tab3, tab4, tab5= st.tabs(["📈 Live Prices", "📉 Peer Trends", "📊 Metrics",  "📰 News", "⚡ portfolio"])
+tab1, tab2, tab3, tab4, tab5, tab6= st.tabs(["📈 Live Prices", "📉 Peer Trends", "📊 Metrics",  "📰 News", "⚡ portfolio", "⚙️ Settings & Info"])
 
 with tab1:
     st.subheader("🔍 Stock Explorer")
@@ -580,10 +591,16 @@ with tab5:
     gain_pct = (total_gain / total_invested) * 100 if total_invested else 0
 
     colA, colB, colC = st.columns(3)
-    colA.metric("💰 Total Balance", f"${total_value:.2f}")
-    colB.metric("📈 Total Profit/Loss", f"${total_gain:.2f}", f"{gain_pct:.2f}% All Time")
-    colC.metric("🏦 Invested Capital", f"${total_invested:.2f}")
 
+    with colA.container(border=True):
+        st.metric("💰 Total Balance", f"${total_value:.2f}")
+
+    with colB.container(border=True):
+        st.metric("📈 Total Profit/Loss", f"${total_gain:.2f}", f"{gain_pct:.2f}% All Time")
+
+    with colC.container(border=True):
+        st.metric("🏦 Invested Capital", f"${total_invested:.2f}")
+    
     # --- Charts Section ---
     if not df.empty:
         st.markdown("### 📊 Portfolio Charts")
@@ -668,8 +685,110 @@ with tab5:
         mime="text/csv"
     )
 
+
+with tab6:
+    st.subheader("⚙️ Settings & Info")
+
+    # Create two side-by-side columns
+    col1, col2 = st.columns(2)
+
+    # --- Maintenance Scheduling Card ---
+    with col1:
+        with st.container(border=True):
+            st.markdown("### 🛠️ Updates & Maintenance Schedule")
+
+            with st.expander("📅 View Calendar", expanded=False):
+                components.html("""
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+                <style>
+                    .flatpickr-calendar {
+                        background: #2c2c2c !important;
+                        color: #fff !important;
+                        border: 1px solid #444;
+                        font-family: 'Segoe UI', sans-serif;
+                    }
+                    .flatpickr-day:hover {
+                        background: #666 !important;
+                        color: #fff !important;
+                        border-radius: 50% !important;
+                    }
+                    .flatpickr-day {
+                        color: #fff !important;
+                    }
+                    .flatpickr-day.saturday {
+                        background-color: #ff4b4b !important;
+                        color: white !important;
+                        border-radius: 50% !important;
+                    }
+                    .flatpickr-weekday {
+                        color: #ccc !important;
+                    }
+                    .flatpickr-months .flatpickr-month {
+                        color: #fff !important;
+                    }
+                    .flatpickr-current-month input.cur-year {
+                        color: #ccc !important;
+                    }
+                </style>
+                <input id="calendar" type="text" readonly style="visibility:hidden; height:0;">
+                <div id="calendar-container"></div>
+                <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+                <script>
+                    flatpickr("#calendar", {
+                        inline: true,
+                        clickOpens: false,
+                        defaultDate: "2025-12-20",
+                        onDayCreate: function(dObj, dStr, fp, dayElem) {
+                            const date = new Date(dayElem.dateObj);
+                            if (date.getDay() === 6) {
+                                dayElem.classList.add("saturday");
+                            }
+                        },
+                        appendTo: document.getElementById("calendar-container")
+                    });
+                </script>
+                """, height=330)
+
+            # Upcoming Maintenance
+            upcoming = next_saturday().date()
+            st.markdown(f"🔔 **Upcoming Maintenance:** {upcoming.strftime('%A, %d %B %Y')}")
+
+    # --- Future Updates Card ---
+    with col2:
+        with st.container(border=True):
+            st.markdown("### 🚀 Future Updates")
+            st.write("""
+            - 🤖 AI Integration for predictive analytics  
+            - 📊 chat with your data  
+            - 🌐 Multi-source data integration         
+            """)
     
-    
+
+    col3, col4 = st.columns(2)
+
+    with col3:
+        with st.container(border=True):
+            st.markdown("### ⚡ App Status")
+            st.markdown("""
+            <div style="height:140px; display:flex; justify-content:center; align-items:center;">
+                <a href="https://live-stock.betteruptime.com/" target="_blank">
+                    <img src="https://uptime.betterstack.com/status-badges/v1/monitor/196o6.svg" 
+                         alt="Uptime Badge" 
+                         style="transform: scale(3); transform-origin: center;">
+                </a>
+            </div>
+            """, unsafe_allow_html=True)
+
+    with col4:
+        with st.container(border=True):
+            st.markdown("### 🤝 Collaboration")
+            st.markdown("""
+            Interested in collaborating or hiring?  
+            - 📧 Contact me at: anshkunwar3009@gmail.com  
+            - 🧠 Explore more projects: [streamlit](https://share.streamlit.io/user/anshk1234)  
+            - 🌐 Visit my GitHub: [github](https://github.com/anshk1234)         
+            """)
+
 
 # Sidebar insights
 info = yf.Ticker(selected_symbol).info
@@ -696,4 +815,3 @@ st.sidebar.markdown("<br><center>© 2025 Live Stock Dashboard</center>", unsafe_
     
 # ---- Footer ----
 st.markdown("<p style='text-align:center; color:white;'>© 2025 Live Stock Dashboard | Powered by Yahoo Finance</p>", unsafe_allow_html=True)
-
