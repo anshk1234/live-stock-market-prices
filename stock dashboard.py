@@ -12,8 +12,6 @@ from streamlit_echarts import st_echarts
 import plotly.graph_objects as go
 import streamlit.components.v1 as components
 
-
-
 # Page config
 st.set_page_config(page_title="📈 Live Stock Dashboard", layout="wide")
 
@@ -70,7 +68,7 @@ except:
     st.sidebar.image("https://upload.wikimedia.org/wikipedia/commons/6/65/No-Image-Placeholder.svg", width=120)
 
 # Fetch live data
-@st.cache_data(ttl=3600) 
+@st.cache_data(ttl=3600)   # cache for 1 hour
 def fetch_stock_details(ticker, period="1mo"):
     stock = yf.Ticker(ticker)
     info = stock.info
@@ -90,11 +88,22 @@ def fetch_stock_details(ticker, period="1mo"):
     # Request full OHLC data
     history = stock.history(period=period, interval="1d")[["Open", "High", "Low", "Close"]]
     return details, history
-    
 
+@st.cache_data(ttl=36000) 
+def fetch_metrics():
+    metrics = []
+    for name, symbol in symbols.items():
+        info = yf.Ticker(symbol).info
+        metrics.append({
+            "Company": name,
+            "PE Ratio": info.get("trailingPE", "N/A"),
+            "EPS": info.get("trailingEps", "N/A"),
+            "Analyst Rating": info.get("recommendationMean", "N/A")  # 1=Strong Buy, 5=Sell
+        })
+    return pd.DataFrame(metrics)
 
 # Fetch news
-@st.cache_data(ttl=36000) 
+@st.cache_data(ttl=21600) 
 def fetch_news(ticker):
     try:
         stock = yf.Ticker(ticker)
@@ -271,7 +280,7 @@ def next_saturday(start_date=None):
 
 
 # Tabs layout
-tab1, tab2, tab3, tab4, tab5= st.tabs(["📈 Live Prices", "📉 Peer Trends", "📰 News", "⚡ portfolio", "⚙️ Settings & Info"])
+tab1, tab2, tab3, tab4, tab5, tab6= st.tabs(["📈 Live Prices", "📉 Peer Trends", "📊 Metrics",  "📰 News", "⚡ portfolio", "⚙️ Settings & Info"])
 
 with tab1:
     st.subheader("🔍 Stock Explorer")
@@ -386,7 +395,62 @@ with tab1:
 with tab2:
     show_peer_analysis()
 
+
 with tab3:
+    st.subheader("📊 Financial Metrics & Analyst Insights")
+    metrics_df = fetch_metrics()
+
+    # Line chart: PE Ratio and EPS
+    fig_pe_eps = px.line(
+        metrics_df.sort_values("EPS"),
+        x="Company", y=["PE Ratio", "EPS"],
+        title="PE Ratio and EPS by Company", markers=True
+    )
+    st.plotly_chart(fig_pe_eps, use_container_width=True)
+
+    
+
+    # Analyst Rating Chart (bar)
+    fig_rating = px.bar(
+        metrics_df.sort_values("Analyst Rating"),
+        x="Analyst Rating", y="Company",
+        orientation="h",
+        color="Analyst Rating",
+        color_continuous_scale="RdYlGn_r",
+        title="Analyst Recommendation Score (1=Strong Buy, 5=Sell)"
+    )
+    st.plotly_chart(fig_rating, use_container_width=True)
+
+    # Analyst Rating Gauges in card UI (max 4 per row)
+    st.subheader("🔮 Analyst Rating Gauges")
+    with st.expander("⚡View Analyst Ratings", expanded=False):
+        for i in range(0, len(metrics_df), 4):
+            cols = st.columns(4)  # up to 4 cards per row
+            for j, (_, row) in enumerate(metrics_df.iloc[i:i+4].iterrows()):
+                with cols[j]:
+                    with st.container(border=True):  # card-style border
+                        st.markdown(f"### {row['Company']}")
+                        fig = go.Figure(go.Indicator(
+                            mode="gauge+number",
+                            value=row["Analyst Rating"],
+                            title={"text": "Analyst Rating"},
+                            gauge={
+                                "axis": {"range": [1, 5]},
+                                "steps": [
+                                    {"range": [1, 2], "color": "green"},
+                                    {"range": [2, 3], "color": "lightgreen"},
+                                    {"range": [3, 4], "color": "orange"},
+                                    {"range": [4, 5], "color": "red"}
+                                ] 
+                            }
+                        ))
+                        fig.update_layout(height=250, margin=dict(t=20, b=20, l=10, r=10))
+                        st.plotly_chart(fig, use_container_width=True)
+
+    # Full Data Table
+    st.dataframe(metrics_df.set_index("Company"))
+
+with tab4:
     st.subheader(f"📰 Latest News for {selected}")
     news_items = fetch_news(selected_symbol)
 
@@ -425,7 +489,7 @@ with tab3:
     else:
         st.info("No news available at the moment.")
 
-with tab4:
+with tab5:
     # Session state to store portfolio
     if "portfolio" not in st.session_state:
         st.session_state.portfolio = []
@@ -612,7 +676,7 @@ with tab4:
     )
 
 
-with tab5:
+with tab6:
     st.subheader("⚙️ Settings & Info")
 
     # Create two side-by-side columns
@@ -741,7 +805,3 @@ st.sidebar.markdown("<br><center>© 2025 Live Stock Dashboard</center>", unsafe_
     
 # ---- Footer ----
 st.markdown("<p style='text-align:center; color:white;'>© 2025 Live Stock Dashboard | Powered by Yahoo Finance</p>", unsafe_allow_html=True)
-
-
-
-
