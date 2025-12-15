@@ -423,7 +423,7 @@ with tab3:
 
     # Analyst Rating Gauges in card UI (max 4 per row)
     st.subheader("🔮 Analyst Rating Gauges")
-    with st.expander("⚡View Analyst Ratings", expanded=False):
+    with st.expander("⚡View Analyst Ratings", expanded=True):
         for i in range(0, len(metrics_df), 4):
             cols = st.columns(4)  # up to 4 cards per row
             for j, (_, row) in enumerate(metrics_df.iloc[i:i+4].iterrows()):
@@ -806,4 +806,5 @@ st.sidebar.markdown("<br><center>© 2025 Live Stock Dashboard</center>", unsafe_
     
 # ---- Footer ----
 st.markdown("<p style='text-align:center; color:white;'>© 2025 Live Stock Dashboard | Powered by Yahoo Finance</p>", unsafe_allow_html=True)
+
 
