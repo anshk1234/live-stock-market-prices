@@ -70,7 +70,7 @@ except:
     st.sidebar.image("https://upload.wikimedia.org/wikipedia/commons/6/65/No-Image-Placeholder.svg", width=120)
 
 # Fetch live data
-@st.cache_data(ttl=21600) 
+@st.cache_data(ttl=3600) 
 def fetch_stock_details(ticker, period="1mo"):
     stock = yf.Ticker(ticker)
     info = stock.info
@@ -818,4 +818,5 @@ st.sidebar.markdown("<br><center>© 2025 Live Stock Dashboard</center>", unsafe_
     
 # ---- Footer ----
 st.markdown("<p style='text-align:center; color:white;'>© 2025 Live Stock Dashboard | Powered by Yahoo Finance</p>", unsafe_allow_html=True)
+
 
