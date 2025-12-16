@@ -36,7 +36,6 @@ if st.session_state.show_intro:
 st.header('''📈 Live Stock Dashboard''')
 # Define companies and symbols
 symbols = {
-    "Apple": "AAPL",
     "Microsoft": "MSFT",
     "Amazon": "AMZN",
     "Tesla": "TSLA",
@@ -47,7 +46,6 @@ symbols = {
 
 # Logo URLs
 logos = {
-    "Apple": "https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg",
     "Microsoft": "https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg",
     "Amazon": "https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg",
     "Tesla": "https://upload.wikimedia.org/wikipedia/commons/b/bd/Tesla_Motors.svg",
@@ -806,5 +804,6 @@ st.sidebar.markdown("<br><center>© 2025 Live Stock Dashboard</center>", unsafe_
     
 # ---- Footer ----
 st.markdown("<p style='text-align:center; color:white;'>© 2025 Live Stock Dashboard | Powered by Yahoo Finance</p>", unsafe_allow_html=True)
+
 
 
