@@ -451,6 +451,7 @@ with tab3:
 
 with tab4:
     st.subheader(f"📰 Latest News for {selected}")
+    st.markdown(we are facing some issues in news section , will be solved soon !)
     news_items = fetch_news(selected_symbol)
 
     if news_items:
@@ -804,6 +805,7 @@ st.sidebar.markdown("<br><center>© 2025 Live Stock Dashboard</center>", unsafe_
     
 # ---- Footer ----
 st.markdown("<p style='text-align:center; color:white;'>© 2025 Live Stock Dashboard | Powered by Yahoo Finance</p>", unsafe_allow_html=True)
+
 
 
 
