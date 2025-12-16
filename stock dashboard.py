@@ -11,7 +11,7 @@ import io
 from streamlit_echarts import st_echarts
 import plotly.graph_objects as go
 import streamlit.components.v1 as components
-
+ 
 # Page config
 st.set_page_config(page_title="📈 Live Stock Dashboard", layout="wide")
 
@@ -804,6 +804,7 @@ st.sidebar.markdown("<br><center>© 2025 Live Stock Dashboard</center>", unsafe_
     
 # ---- Footer ----
 st.markdown("<p style='text-align:center; color:white;'>© 2025 Live Stock Dashboard | Powered by Yahoo Finance</p>", unsafe_allow_html=True)
+
 
 
 
