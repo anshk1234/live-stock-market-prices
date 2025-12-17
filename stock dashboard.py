@@ -191,7 +191,7 @@ def show_peer_analysis():
 
     
     # --- Price cards inside expander only ---
-    with st.expander("💵 Current Prices of Selected Companies", expanded=False):
+    with st.expander("💵 Check Current Prices of Selected Companies", expanded=False):
         for i in range(0, len(tickers), 4):  # 4 cards per row
             row = st.columns(min(4, len(tickers) - i))
             for j, ticker in enumerate(tickers[i:i+4]):
@@ -804,6 +804,7 @@ st.sidebar.markdown("<br><center>© 2025 Live Stock Dashboard</center>", unsafe_
     
 # ---- Footer ----
 st.markdown("<p style='text-align:center; color:white;'>© 2025 Live Stock Dashboard | Powered by Yahoo Finance</p>", unsafe_allow_html=True)
+
 
 
 
