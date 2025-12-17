@@ -370,8 +370,6 @@ with tab1:
         st.info("Candlestick data not available for this range.")
 
     # --- Other snapshot cards BELOW chart ---
-    st.markdown("### 📊 Company Snapshot")
-
     row1 = st.columns(3)
     with row1[0].container(border=True):
         st.metric("📦 Volume", f"{details['volume']:,}")
@@ -804,6 +802,7 @@ st.sidebar.markdown("<br><center>© 2025 Live Stock Dashboard</center>", unsafe_
     
 # ---- Footer ----
 st.markdown("<p style='text-align:center; color:white;'>© 2025 Live Stock Dashboard | Powered by Yahoo Finance</p>", unsafe_allow_html=True)
+
 
 
 
