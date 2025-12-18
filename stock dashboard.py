@@ -36,7 +36,7 @@ if st.session_state.show_intro:
 st.header('''📈 Live Stock Dashboard''')
 # Define companies and symbols
 symbols = {
-    "APPLE": "APPL"
+    "APPLE": "APPL",
     "Microsoft": "MSFT",
     "Amazon": "AMZN",
     "Tesla": "TSLA",
@@ -803,6 +803,7 @@ st.sidebar.markdown("<br><center>© 2025 Live Stock Dashboard</center>", unsafe_
     
 # ---- Footer ----
 st.markdown("<p style='text-align:center; color:white;'>© 2025 Live Stock Dashboard | Powered by Yahoo Finance</p>", unsafe_allow_html=True)
+
 
 
 
