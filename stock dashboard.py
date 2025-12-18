@@ -11,7 +11,7 @@ import io
 from streamlit_echarts import st_echarts
 import plotly.graph_objects as go
 import streamlit.components.v1 as components
- 
+
 # Page config
 st.set_page_config(page_title="📈 Live Stock Dashboard", layout="wide")
 
@@ -33,37 +33,8 @@ if st.session_state.show_intro:
     splash.empty()
     st.session_state.show_intro = False
 
+#app title
 st.header('''📈 Live Stock Dashboard''')
-# Define companies and symbols
-symbols = {
-    "Microsoft": "MSFT",
-    "Amazon": "AMZN",
-    "Tesla": "TSLA",
-    "Google": "GOOG",
-    "NVIDIA": "NVDA",
-    "Meta": "META"
-}
-
-# Logo URLs
-logos = {
-    "Microsoft": "https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg",
-    "Amazon": "https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg",
-    "Tesla": "https://upload.wikimedia.org/wikipedia/commons/b/bd/Tesla_Motors.svg",
-    "Google": "https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg",
-    "NVIDIA": "https://www.logo.wine/a/logo/Nvidia/Nvidia-Light-Vertical-Dark-Background-Logo.wine.svg",
-    "Meta": "https://tse2.mm.bing.net/th/id/OIP.UuE5-qQHGzojP7JoW2jRzwHaGB?cb=ucfimg2ucfimg=1&rs=1&pid=ImgDetMain&o=7&rm=3"
-}
-
-# Sidebar: Select company
-st.sidebar.title("🔍 Company Insights")
-selected = st.sidebar.selectbox("Choose a company", list(symbols.keys()))
-selected_symbol = symbols[selected]
-
-# Display logo
-try:
-    st.sidebar.image(logos[selected], width=120)
-except:
-    st.sidebar.image("https://upload.wikimedia.org/wikipedia/commons/6/65/No-Image-Placeholder.svg", width=120)
 
 # Fetch live data
 @st.cache_data(ttl=3600)   # cache for 1 hour
@@ -87,21 +58,38 @@ def fetch_stock_details(ticker, period="1mo"):
     history = stock.history(period=period, interval="1d")[["Open", "High", "Low", "Close"]]
     return details, history
 
-@st.cache_data(ttl=36000) 
+
+
+# Define symbols globally for metric tab
+symbols = {
+    "Apple": "AAPL",
+    "Microsoft": "MSFT",
+    "Tesla": "TSLA",
+    "NVIDIA": "NVDA",
+    "Amazon": "AMZN",
+    "Google": "GOOG",
+    "Meta": "META"
+}
+
+@st.cache_data(ttl=36000) # cache for 10 hours
 def fetch_metrics():
     metrics = []
     for name, symbol in symbols.items():
-        info = yf.Ticker(symbol).info
-        metrics.append({
-            "Company": name,
-            "PE Ratio": info.get("trailingPE", "N/A"),
-            "EPS": info.get("trailingEps", "N/A"),
-            "Analyst Rating": info.get("recommendationMean", "N/A")  # 1=Strong Buy, 5=Sell
-        })
+        try:
+            info = yf.Ticker(symbol).info
+            metrics.append({
+                "Company": name,
+                "PE Ratio": info.get("trailingPE", "N/A"),
+                "EPS": info.get("trailingEps", "N/A"),
+                "Analyst Rating": info.get("recommendationMean", "N/A")  # 1=Strong Buy, 5=Sell
+            })
+        except Exception as e:
+            st.error(f"Error fetching {name}: {e}")
     return pd.DataFrame(metrics)
 
+
 # Fetch news
-@st.cache_data(ttl=21600) 
+@st.cache_data(ttl=21600) # cache for 6 hours
 def fetch_news(ticker):
     try:
         stock = yf.Ticker(ticker)
@@ -143,7 +131,7 @@ def show_peer_analysis():
         st.info("Pick some stocks to compare")
         st.stop()
 
-    @st.cache_data(ttl=21600)
+    @st.cache_data(ttl=21600) # cache for 6 hours
     def load_data(tickers, period):
         frames = []
         for ticker in tickers:
@@ -191,7 +179,7 @@ def show_peer_analysis():
 
     
     # --- Price cards inside expander only ---
-    with st.expander("💵 Check Current Prices of Selected Companies", expanded=True):
+    with st.expander("💵 Current Prices of Selected Companies", expanded=True):
         for i in range(0, len(tickers), 4):  # 4 cards per row
             row = st.columns(min(4, len(tickers) - i))
             for j, ticker in enumerate(tickers[i:i+4]):
@@ -370,6 +358,7 @@ with tab1:
         st.info("Candlestick data not available for this range.")
 
     # --- Other snapshot cards BELOW chart ---
+
     row1 = st.columns(3)
     with row1[0].container(border=True):
         st.metric("📦 Volume", f"{details['volume']:,}")
@@ -444,15 +433,22 @@ with tab3:
                         st.plotly_chart(fig, use_container_width=True)
 
     # Full Data Table
-    st.subheader("raw data")
     st.dataframe(metrics_df.set_index("Company"))
 
 with tab4:
-    st.subheader(f"📰 Latest News for {selected}")
-    news_items = fetch_news(selected_symbol)
+    st.subheader("📰 General Stock Market News")
 
-    if news_items:
-        for item in news_items[:1]:
+    # Collect news from multiple tickers
+    tickers = ["AAPL", "MSFT", "TSLA", "NVDA", "AMZN", "GOOG", "META"]
+    all_news = []
+    for ticker in tickers:
+        items = fetch_news(ticker)
+        if items:
+            all_news.extend(items)
+
+    # Show combined news feed (no ticker headings)
+    if all_news:
+        for item in all_news[:6]:  # show top 12 combined
             content = item.get("content", {})
             title = content.get("title", "No title available")
             summary = content.get("summary", "")
@@ -485,6 +481,7 @@ with tab4:
             st.markdown("---")
     else:
         st.info("No news available at the moment.")
+
 
 with tab5:
     # Session state to store portfolio
@@ -776,13 +773,78 @@ with tab6:
             - 🌐 Visit my GitHub: [github](https://github.com/anshk1234)         
             """)
 
+#sidebar
+symbols = {
+    "Apple": "AAPL",
+    "Microsoft": "MSFT",
+    "Tesla": "TSLA",
+    "NVIDIA": "NVDA",
+    "Amazon": "AMZN",
+    "Google": "GOOG",
+    "Meta": "META",
+    "Netflix": "NFLX",
+    "Adobe": "ADBE",
+    "Intel": "INTC",
+    "AMD": "AMD",
+    "Broadcom": "AVGO",
+    "Qualcomm": "QCOM",
+    "Salesforce": "CRM",
+    "PayPal": "PYPL",
+    "Visa": "V",
+    "Mastercard": "MA",
+    "JPMorgan Chase": "JPM",
+    "Bank of America": "BAC",
+    "Walmart": "WMT",
+    "Coca-Cola": "KO",
+    "PepsiCo": "PEP",
+    "McDonald's": "MCD",
+    "Starbucks": "SBUX"
+}
 
-# Sidebar insights
-info = yf.Ticker(selected_symbol).info
-st.sidebar.markdown(f"**Sector**: {info.get('sector', 'N/A')}")
-st.sidebar.markdown(f"**Market Cap**: ${info.get('marketCap', 'N/A'):,}")
-st.sidebar.markdown(f"**PE Ratio**: {info.get('trailingPE', 'N/A')}")
-st.sidebar.markdown(f"**52-Week High**: ${info.get('fiftyTwoWeekHigh', 'N/A')}")
+@st.cache_data(ttl=3600)  # cache for 1 hour
+def get_daily_details(symbols):
+    details = {}
+    for name, ticker in symbols.items():
+        try:
+            stock = yf.Ticker(ticker)
+            hist = stock.history(period="1d")
+            if not hist.empty:
+                open_price = hist["Open"][0]
+                close_price = hist["Close"][0]
+                change_pct = ((close_price - open_price) / open_price) * 100
+                details[name] = {
+                    "price": close_price,
+                    "change_pct": change_pct
+                }
+        except Exception as e:
+            st.warning(f"Error fetching {name}: {e}")
+    return details
+
+with st.sidebar:
+    st.header("📈 Daily Snapshot")
+
+    details = get_daily_details(symbols)
+
+    if details:
+        # Find best and worst
+        best_stock = max(details, key=lambda x: details[x]["change_pct"])
+        worst_stock = min(details, key=lambda x: details[x]["change_pct"])
+
+        # Best stock card
+        with st.container(border=True):
+            st.markdown("### Today’s Best Stock")
+            st.markdown(f"**{best_stock}**")
+            st.metric("💵 Price", f"${details[best_stock]['price']:.2f}", f"{details[best_stock]['change_pct']:.2f}%")
+
+        # Worst stock card
+        with st.container(border=True):
+            st.markdown("### Today’s Worst Stock")
+            st.markdown(f"**{worst_stock}**")
+            st.metric("💵 Price", f"${details[worst_stock]['price']:.2f}", f"{details[worst_stock]['change_pct']:.2f}%")
+    else:
+        st.info("No performance data available today.")
+
+
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 🙌 Credits")
 st.sidebar.markdown("""
@@ -795,25 +857,9 @@ st.sidebar.markdown("""
 - 📧 **Contact**: anshkunwar3009@gmail.com     
 -  This App is Licensed Under **Apache License 2.0**
     
-     
 """) 
 
 st.sidebar.markdown("<br><center>© 2025 Live Stock Dashboard</center>", unsafe_allow_html=True)
     
 # ---- Footer ----
 st.markdown("<p style='text-align:center; color:white;'>© 2025 Live Stock Dashboard | Powered by Yahoo Finance</p>", unsafe_allow_html=True)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
