@@ -781,25 +781,9 @@ symbols = {
     "NVIDIA": "NVDA",
     "Amazon": "AMZN",
     "Google": "GOOG",
-    "Meta": "META",
-    "Netflix": "NFLX",
-    "Adobe": "ADBE",
-    "Intel": "INTC",
-    "AMD": "AMD",
-    "Broadcom": "AVGO",
-    "Qualcomm": "QCOM",
-    "Salesforce": "CRM",
-    "PayPal": "PYPL",
-    "Visa": "V",
-    "Mastercard": "MA",
-    "JPMorgan Chase": "JPM",
-    "Bank of America": "BAC",
-    "Walmart": "WMT",
-    "Coca-Cola": "KO",
-    "PepsiCo": "PEP",
-    "McDonald's": "MCD",
-    "Starbucks": "SBUX"
+    "Meta": "META"
 }
+
 
 @st.cache_data(ttl=3600)  # cache for 1 hour
 def get_daily_details(symbols):
@@ -863,3 +847,4 @@ st.sidebar.markdown("<br><center>© 2025 Live Stock Dashboard</center>", unsafe_
     
 # ---- Footer ----
 st.markdown("<p style='text-align:center; color:white;'>© 2025 Live Stock Dashboard | Powered by Yahoo Finance</p>", unsafe_allow_html=True)
+
