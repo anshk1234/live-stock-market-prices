@@ -385,6 +385,9 @@ with tab3:
     st.subheader("📊 Financial Metrics & Analyst Insights")
     metrics_df = fetch_metrics()
 
+    # Ensure Analyst Rating is numeric
+    metrics_df["Analyst Rating"] = pd.to_numeric(metrics_df["Analyst Rating"], errors="coerce")
+
     # Line chart: PE Ratio and EPS
     fig_pe_eps = px.line(
         metrics_df.sort_values("EPS"),
@@ -393,11 +396,9 @@ with tab3:
     )
     st.plotly_chart(fig_pe_eps, use_container_width=True)
 
-    
-
     # Analyst Rating Chart (bar)
     fig_rating = px.bar(
-        metrics_df.sort_values("Analyst Rating"),
+        metrics_df.sort_values("Analyst Rating", na_position="last"),
         x="Analyst Rating", y="Company",
         orientation="h",
         color="Analyst Rating",
@@ -426,7 +427,7 @@ with tab3:
                                     {"range": [2, 3], "color": "lightgreen"},
                                     {"range": [3, 4], "color": "orange"},
                                     {"range": [4, 5], "color": "red"}
-                                ] 
+                                ]
                             }
                         ))
                         fig.update_layout(height=250, margin=dict(t=20, b=20, l=10, r=10))
@@ -847,6 +848,7 @@ st.sidebar.markdown("<br><center>© 2025 Live Stock Dashboard</center>", unsafe_
     
 # ---- Footer ----
 st.markdown("<p style='text-align:center; color:white;'>© 2025 Live Stock Dashboard | Powered by Yahoo Finance</p>", unsafe_allow_html=True)
+
 
 
 
