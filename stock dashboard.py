@@ -385,7 +385,7 @@ with tab3:
     st.subheader("📊 Financial Metrics & Analyst Insights")
     metrics_df = fetch_metrics()
 
-    # Ensure Analyst Rating is numeric
+    # Force Analyst Rating to numeric (convert strings like "3" to 3.0, invalid → NaN)
     metrics_df["Analyst Rating"] = pd.to_numeric(metrics_df["Analyst Rating"], errors="coerce")
 
     # Line chart: PE Ratio and EPS
@@ -848,6 +848,7 @@ st.sidebar.markdown("<br><center>© 2025 Live Stock Dashboard</center>", unsafe_
     
 # ---- Footer ----
 st.markdown("<p style='text-align:center; color:white;'>© 2025 Live Stock Dashboard | Powered by Yahoo Finance</p>", unsafe_allow_html=True)
+
 
 
 
