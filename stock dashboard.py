@@ -449,7 +449,7 @@ with tab4:
 
     # Show combined news feed (no ticker headings)
     if all_news:
-        for item in all_news[:4]:  # show top 12 combined
+        for item in all_news[:3]:  # show top 12 combined
             content = item.get("content", {})
             title = content.get("title", "No title available")
             summary = content.get("summary", "")
@@ -848,6 +848,7 @@ st.sidebar.markdown("<br><center>© 2025 Live Stock Dashboard</center>", unsafe_
     
 # ---- Footer ----
 st.markdown("<p style='text-align:center; color:white;'>© 2025 Live Stock Dashboard | Powered by Yahoo Finance</p>", unsafe_allow_html=True)
+
 
 
 
