@@ -383,58 +383,7 @@ with tab2:
 
 with tab3:
     st.subheader("📊 Financial Metrics & Analyst Insights")
-    metrics_df = fetch_metrics()
-
-    # Force Analyst Rating to numeric (convert strings like "3" to 3.0, invalid → NaN)
-    metrics_df["Analyst Rating"] = pd.to_numeric(metrics_df["Analyst Rating"], errors="coerce")
-
-    # Line chart: PE Ratio and EPS
-    fig_pe_eps = px.line(
-        metrics_df.sort_values("EPS"),
-        x="Company", y=["PE Ratio", "EPS"],
-        title="PE Ratio and EPS by Company", markers=True
-    )
-    st.plotly_chart(fig_pe_eps, use_container_width=True)
-
-    # Analyst Rating Chart (bar)
-    fig_rating = px.bar(
-        metrics_df.sort_values("Analyst Rating", na_position="last"),
-        x="Analyst Rating", y="Company",
-        orientation="h",
-        color="Analyst Rating",
-        color_continuous_scale="RdYlGn_r",
-        title="Analyst Recommendation Score (1=Strong Buy, 5=Sell)"
-    )
-    st.plotly_chart(fig_rating, use_container_width=True)
-
-    # Analyst Rating Gauges in card UI (max 4 per row)
-    st.subheader("🔮 Analyst Rating Gauges")
-    with st.expander("⚡View Analyst Ratings", expanded=True):
-        for i in range(0, len(metrics_df), 4):
-            cols = st.columns(4)  # up to 4 cards per row
-            for j, (_, row) in enumerate(metrics_df.iloc[i:i+4].iterrows()):
-                with cols[j]:
-                    with st.container(border=True):  # card-style border
-                        st.markdown(f"### {row['Company']}")
-                        fig = go.Figure(go.Indicator(
-                            mode="gauge+number",
-                            value=row["Analyst Rating"],
-                            title={"text": "Analyst Rating"},
-                            gauge={
-                                "axis": {"range": [1, 5]},
-                                "steps": [
-                                    {"range": [1, 2], "color": "green"},
-                                    {"range": [2, 3], "color": "lightgreen"},
-                                    {"range": [3, 4], "color": "orange"},
-                                    {"range": [4, 5], "color": "red"}
-                                ]
-                            }
-                        ))
-                        fig.update_layout(height=250, margin=dict(t=20, b=20, l=10, r=10))
-                        st.plotly_chart(fig, use_container_width=True)
-
-    # Full Data Table
-    st.dataframe(metrics_df.set_index("Company"))
+    st.markdown(" UNDER MAINTENANCE ")
 
 with tab4:
     st.subheader("📰 General Stock Market News")
@@ -848,6 +797,7 @@ st.sidebar.markdown("<br><center>© 2025 Live Stock Dashboard</center>", unsafe_
     
 # ---- Footer ----
 st.markdown("<p style='text-align:center; color:white;'>© 2025 Live Stock Dashboard | Powered by Yahoo Finance</p>", unsafe_allow_html=True)
+
 
 
 
