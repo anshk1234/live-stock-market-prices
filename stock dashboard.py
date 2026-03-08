@@ -817,4 +817,3 @@ st.markdown("<p style='text-align:center; color:white;'>© 2025 Live Stock Dashb
 
 
 
-
