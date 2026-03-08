@@ -431,7 +431,7 @@ with tab3:
                             }
                         ))
                         fig.update_layout(height=250, margin=dict(t=20, b=20, l=10, r=10))
-                        st.plotly_chart(fig, width= stretch)
+                        st.plotly_chart(fig, use_container_width=True)
 
     # Full Data Table
     st.dataframe(metrics_df.set_index("Company"))
@@ -848,6 +848,7 @@ st.sidebar.markdown("<br><center>© 2025 Live Stock Dashboard</center>", unsafe_
     
 # ---- Footer ----
 st.markdown("<p style='text-align:center; color:white;'>© 2025 Live Stock Dashboard | Powered by Yahoo Finance</p>", unsafe_allow_html=True)
+
 
 
 
