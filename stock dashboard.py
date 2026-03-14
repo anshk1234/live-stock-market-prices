@@ -425,7 +425,7 @@ with tab4:
 
     # Show combined news feed (no ticker headings)
     if all_news:
-        for item in all_news[:2]:  # show top 12 combined
+        for item in all_news[:5]:  # show top 12 combined
             content = item.get("content", {})
             title = content.get("title", "No title available")
             summary = content.get("summary", "")
