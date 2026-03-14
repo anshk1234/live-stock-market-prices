@@ -416,7 +416,7 @@ with tab4:
     st.subheader("📰 General Stock Market News")
 
     # Collect news from multiple tickers
-    tickers = ["AAPL", "MSFT", "TSLA", "NVDA", "AMZN", "GOOG", "META"]
+    tickers = ["MSFT", "TSLA", "NVDA", "AMZN", "GOOG", "META"]
     all_news = []
     for ticker in tickers:
         items = fetch_news(ticker)
@@ -425,7 +425,7 @@ with tab4:
 
     # Show combined news feed (no ticker headings)
     if all_news:
-        for item in all_news[:0]:  # show top 12 combined
+        for item in all_news[:2]:  # show top 12 combined
             content = item.get("content", {})
             title = content.get("title", "No title available")
             summary = content.get("summary", "")
