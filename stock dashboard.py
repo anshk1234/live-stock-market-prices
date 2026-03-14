@@ -174,7 +174,7 @@ def show_peer_analysis():
             alt.Color("Stock:N"),
         )
         .properties(height=400),
-        use_container_width=True
+        width="stretch"
     )
 
     
@@ -209,7 +209,7 @@ def show_peer_analysis():
                             )
                             .properties(height=100)
                         )
-                        st.altair_chart(sparkline, use_container_width=True)
+                        st.altair_chart(sparkline, width="stretch")
 
                 except:
                     with row[j].container(border=True):
@@ -237,7 +237,7 @@ def show_peer_analysis():
             ).properties(title=f"{ticker} vs peer average", height=300)
 
             cell = cols[(i * 2) % 4].container(border=True)
-            cell.altair_chart(chart, use_container_width=True)
+            cell.altair_chart(chart, width="stretch")
 
             delta_data = pd.DataFrame({
                 "Date": normalized.index,
@@ -250,7 +250,7 @@ def show_peer_analysis():
             ).properties(title=f"{ticker} minus peer average", height=300)
 
             cell = cols[(i * 2 + 1) % 4].container(border=True)
-            cell.altair_chart(chart, use_container_width=True)
+            cell.altair_chart(chart, width="stretch")
 
     # raw data display
     st.markdown("## Raw data")
@@ -345,7 +345,7 @@ with tab1:
                 legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
             )
 
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
 
     # Right-side metrics (card style)
         with col_metrics.container(border=True):
@@ -394,7 +394,7 @@ with tab3:
         x="Company", y=["PE Ratio", "EPS"],
         title="PE Ratio and EPS by Company", markers=True
     )
-    st.plotly_chart(fig_pe_eps, use_container_width=True)
+    st.plotly_chart(fig_pe_eps, width="stretch")
 
     # Analyst Rating Chart (bar)
     fig_rating = px.bar(
@@ -405,7 +405,7 @@ with tab3:
         color_continuous_scale="RdYlGn_r",
         title="Analyst Recommendation Score (1=Strong Buy, 5=Sell)"
     )
-    st.plotly_chart(fig_rating, use_container_width=True)
+    st.plotly_chart(fig_rating, width="stretch")
 
     # Analyst Rating Gauges in card UI (max 4 per row)
     st.subheader("🔮 Analyst Rating Gauges")
@@ -432,10 +432,8 @@ with tab3:
                         ))
                         fig.update_layout(height=250, margin=dict(t=20, b=20, l=10, r=10))
                         # Add a unique key using company name + index
-                        st.plotly_chart(fig, use_container_width=True, key=f"rating_{i}_{j}_{row['Company']}")
+                        st.plotly_chart(fig, width="stretch", key=f"rating_{i}_{j}_{row['Company']}")
 
-
-    
 
     # Full Data Table
     st.dataframe(metrics_df.set_index("Company"))
@@ -651,7 +649,7 @@ with tab5:
             text=df["GAIN_PCT"].apply(lambda x: f"{x:.2f}%"),
             title="Gain/Loss by Asset"
         )
-        st.plotly_chart(fig2, use_container_width=True)
+        st.plotly_chart(fig2, width="stretch")
     else:
         st.info("No portfolio data available to display returns chart.")
 
@@ -663,7 +661,7 @@ with tab5:
         "BALANCE": "${:.2f}",
         "GAIN": "${:.2f}",
         "GAIN_PCT": "{:.2f}%"
-    }), use_container_width=True)
+    }), width="stretch")
     
     # Download portfolio as CSV
     csv = df.to_csv(index=False).encode("utf-8")
@@ -852,28 +850,4 @@ st.sidebar.markdown("<br><center>© 2025 Live Stock Dashboard</center>", unsafe_
     
 # ---- Footer ----
 st.markdown("<p style='text-align:center; color:white;'>© 2025 Live Stock Dashboard | Powered by Yahoo Finance</p>", unsafe_allow_html=True)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
