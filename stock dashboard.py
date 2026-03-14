@@ -407,6 +407,34 @@ with tab3:
     )
     st.plotly_chart(fig_rating, use_container_width=True)
 
+    # Analyst Rating Gauges in card UI (max 4 per row)
+    st.subheader("🔮 Analyst Rating Gauges")
+    with st.expander("⚡View Analyst Ratings", expanded=True):
+        for i in range(0, len(metrics_df), 4):
+            cols = st.columns(4)  # up to 4 cards per row
+            for j, (_, row) in enumerate(metrics_df.iloc[i:i+4].iterrows()):
+                with cols[j]:
+                    with st.container(border=True):  # card-style border
+                        st.markdown(f"### {row['Company']}")
+                        fig = go.Figure(go.Indicator(
+                            mode="gauge+number",
+                            value=row["Analyst Rating"],
+                            title={"text": "Analyst Rating"},
+                            gauge={
+                                "axis": {"range": [1, 5]},
+                                "steps": [
+                                    {"range": [1, 2], "color": "green"},
+                                    {"range": [2, 3], "color": "lightgreen"},
+                                    {"range": [3, 4], "color": "orange"},
+                                    {"range": [4, 5], "color": "red"}
+                                ]
+                            }
+                        ))
+                        fig.update_layout(height=250, margin=dict(t=20, b=20, l=10, r=10))
+                        # Add a unique key using company name + index
+                        st.plotly_chart(fig, use_container_width=True, key=f"rating_{i}_{j}_{row['Company']}")
+
+
     
 
     # Full Data Table
