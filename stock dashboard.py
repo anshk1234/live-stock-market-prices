@@ -442,7 +442,7 @@ with tab4:
     st.subheader("📰 General Stock Market News")
 
     # Collect news from multiple tickers
-    tickers = ["AAPL", "MSFT", "TSLA", "NVDA", "AMZN", "GOOG", "META"]
+    tickers = ["TSLA", "NVDA", "AMZN", "GOOG", "META"]
     all_news = []
     for ticker in tickers:
         items = fetch_news(ticker)
