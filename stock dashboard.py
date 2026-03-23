@@ -451,14 +451,14 @@ with tab4:
 
     # Show combined news feed (no ticker headings)
     if all_news:
-        for item in all_news[:6]:  # show top 12 combined
-            content = item.get("content", {})
-            title = content.get("title", "No title available")
-            summary = content.get("summary", "")
+        for item in all_news[:8]:
+            content = item.get("content") or {}
+            title = content.get("title", "No title available") or "No title available"
+            summary = content.get("summary", "") or ""
             pubDate = content.get("pubDate", None)
-            link = content.get("canonicalUrl", {}).get("url", None)
-            thumbnail = content.get("thumbnail", {}).get("originalUrl", None)
-            provider = content.get("provider", {}).get("displayName", "Unknown")
+            link = (content.get("canonicalUrl") or {}).get("url", None)        # ✅ Fixed
+            thumbnail = (content.get("thumbnail") or {}).get("originalUrl", None)  # ✅ Fixed
+            provider = (content.get("provider") or {}).get("displayName", "Unknown")  # ✅ Fixed
 
             # Show headline
             st.markdown(f"### {title}")
