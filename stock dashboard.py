@@ -745,9 +745,7 @@ with tab6:
         with st.container(border=True):
             st.markdown("### 🚀 Future Updates")
             st.write("""
-            - 🤖 AI Integration for predictive analytics  
-            - 📊 chat with your data  
-            - 🌐 Multi-source data integration         
+            - for advance ai features use our [Stockly.ai](https://stockly-ai.streamlit.app)         
             """)
     
 
