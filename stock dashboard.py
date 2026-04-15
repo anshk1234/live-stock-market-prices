@@ -796,8 +796,8 @@ def get_daily_details(symbols):
             stock = yf.Ticker(ticker)
             hist = stock.history(period="1d")
             if not hist.empty:
-                open_price = hist["Open"][0]
-                close_price = hist["Close"][0]
+                open_price = hist["Open"].iloc[0]
+                close_price = hist["Close"].iloc[0]
                 change_pct = ((close_price - open_price) / open_price) * 100
                 details[name] = {
                     "price": close_price,
