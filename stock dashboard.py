@@ -11,20 +11,23 @@ import io
 from streamlit_echarts import st_echarts
 import plotly.graph_objects as go
 import streamlit.components.v1 as components
+from pathlib import Path
+
+APP_DIR = Path(__file__).resolve().parent
 
 # Page config
 st.set_page_config(page_title="📈 Live Stock Dashboard", layout="wide")
 
 # --- Splash Animation ---
 def load_lottiefile(filepath):
-    with open(filepath, "r", encoding="utf-8") as f:
+    with Path(filepath).open("r", encoding="utf-8") as f:
         return json.load(f)
 
 if "show_intro" not in st.session_state:
     st.session_state.show_intro = True
 
 if st.session_state.show_intro:
-    lottie_intro = load_lottiefile("Money Investment.json")
+    lottie_intro = load_lottiefile(APP_DIR / "Money Investment.json")
     splash = st.empty()
     with splash.container():
         st.markdown("<h1 style='text-align:center;'>Welcome to Stock Market Dashboard !</h1>", unsafe_allow_html=True)
