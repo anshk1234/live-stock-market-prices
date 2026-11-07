@@ -999,7 +999,7 @@ with tab6:
             st.markdown("### 🚀 Future Updates")
             st.markdown("""
             - 🧠 Advanced AI stock predictions & sentiment:  
-              [**Stockly.ai**](https://stockly-ai.streamlit.app)
+              [**Stockly.ai**](https://stocklyai.vercel.app)
             - 📊 Real-time portfolio rebalancing alerts coming soon!
             """)
 
